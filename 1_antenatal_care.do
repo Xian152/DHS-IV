@@ -12,9 +12,7 @@ order *,sequential
 	clonevar cnumvisit=m14                   //Last pregnancies in last 2 years of women currently aged 15-49	
 	replace cnumvisit=. if cnumvisit==98 | cnumvisit==99 
 	
-	gen c_anc = 1 if cnumvisit >= 4
-	replace c_anc=0 if c_anc==. 
-	replace c_anc=. if cnumvisit==.  
+	g c_anc = inrange(cnumvisit,4,97) if cnumvisit!=.
 
 	*c_anc_any: any antenatal care visits of births in last 2 years
 	gen c_anc_any = .
@@ -22,15 +20,11 @@ order *,sequential
 	replace c_anc_any = 0 if m14 == 0                                              //m14 = 98 is missing 
 	
 	*c_anc_ear: First antenatal care visit in first trimester of pregnancy of births in last 2 years
-	gen c_anc_ear = 0 if m2n != .    // m13 based on Women who had seen someone for antenatal care for their last born child
-	replace c_anc_ear = 1 if inrange(m13,0,3)
-	replace c_anc_ear = . if m13 == 98 
-	
+	g c_anc_any = inrange(m14,1,97) if m14<98                                       //m14 = 98 is missing 
+
 	*c_anc_ear_q: First antenatal care visit in first trimester of pregnancy among ANC users of births in last 2 years
-	gen c_anc_ear_q = .
-	replace c_anc_ear_q = 1 if c_anc_ear == 1 & c_anc_any == 1
-	replace c_anc_ear_q = 0 if c_anc_ear == 0 & c_anc_any == 1
-	
+	g c_anc_ear_q = c_anc_ear if c_anc_any == 1 
+
 	*anc_skill: Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife...
 	foreach var of varlist m2a-m2n {
 	local lab: variable label `var' 
@@ -51,7 +45,7 @@ order *,sequential
 	replace c_anc_eff = . if c_anc ==. |  anc_skill==. | anc_blood == .
 	
 	*c_anc_eff_q: Effective ANC (4+ antenatal care visits, any skilled provider, blood pressure, blood and urine samples) among ANC users of births in last 2 years
-    gen c_anc_eff_q = c_anc_eff if c_anc_any == 1
+    	gen c_anc_eff_q = c_anc_eff if c_anc_any == 1
 	
 	*c_anc_ski: antenatal care visit with skilled provider for pregnancy of births in last 2 years
 	gen c_anc_ski = .
@@ -67,24 +61,21 @@ order *,sequential
 	replace c_anc_bp = 1 if m42c==1
 	
 	*c_anc_bp_q: Blood pressure measured during pregnancy among ANC users of births in last 2 years
-	gen c_anc_bp_q = (c_anc_bp==1) if c_anc_any == 1 
-	replace c_anc_bp_q = . if mi(c_anc_bp) & c_anc_any == 1 
+	gen c_anc_bp_q = c_anc_bp if c_anc_any == 1 
 	
 	*c_anc_bs: Blood sample taken during pregnancy of births in last 2 years
 	gen c_anc_bs = 0 if m2n != .    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
 	replace c_anc_bs = 1 if m42e==1
 	
 	*c_anc_bs_q: Blood sample taken during pregnancy among ANC users of births in last 2 years
-	gen c_anc_bs_q = (c_anc_bs==1) if c_anc_any == 1 
-	replace c_anc_bs_q = . if c_anc_bs == . & c_anc_any == 1
+	gen c_anc_bs_q =  c_anc_bs if c_anc_any == 1
 	
 	*c_anc_ur: Urine sample taken during pregnancy of births in last 2 years
 	gen c_anc_ur = 0 if m2n != .    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
 	replace c_anc_ur = 1 if m42d==1
 	
 	*c_anc_ur_q: Urine sample taken during pregnancy among ANC users of births in last 2 years
-	gen c_anc_ur_q = (c_anc_ur==1) if c_anc_any == 1 
-	replace c_anc_ur_q = . if mi(c_anc_ur) & c_anc_any == 1 
+	gen c_anc_ur_q = c_anc_ur if c_anc_any == 1 
 	
 	*c_anc_ir: iron supplements taken during pregnancy of births in last 2 years
 	clonevar c_anc_ir = m45
@@ -92,8 +83,7 @@ order *,sequential
 	replace c_anc_ir = . if m45 == 8
 	
 	*c_anc_ir_q: iron supplements taken during pregnancy among ANC users of births in last 2 years
-	gen c_anc_ir_q = (c_anc_ir == 1 ) if c_anc_any == 1 
-	replace c_anc_ir_q = . if c_anc_any == 1 & mi(c_anc_ir)
+	gen c_anc_ir_q = c_anc_ir if c_anc_any == 1 
 	
 	*c_anc_tet: pregnant women vaccinated against tetanus for last birth in last 2 years
 	gen c_anc_tet = .   //no pregnant women tetanus injection information.  
