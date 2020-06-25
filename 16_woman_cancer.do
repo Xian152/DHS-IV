@@ -42,6 +42,13 @@ if _rc==0 {
     tab wage if w_mammogram!=. /*DHS sample is women aged 15-49*/
     replace w_mammogram=. if wage<50|wage>69
 }
+
+capture confirm variable s490a
+if _rc==0 {
+	replace  w_mammogram = s490a
+	replace  w_mammogram = . if !inrange(v012,20,49)
+}
+
 // They may be country specific in surveys.
 
 
@@ -52,13 +59,19 @@ if _rc==0 {
 gen w_mammogram_ref = ""  //use string in the list: "1yr","2yr","5yr","ever"; or missing as ""
 gen w_papsmear_ref = ""   //use string in the list: "1yr","2yr","3yr","5yr","ever"; or missing as ""
 
+if inlist(name, "Jordan2002") {
+	replace w_mammogram_ref = "1yr"
+}
+
 * Add Age Group.
 //if not in adeptfile, please generate value, otherwise keep it missing. 
 
 gen w_mammogram_age = "" //use string in the list: "20-49","20-59"; or missing as ""
 gen w_papsmear_age = ""  //use string in the list: "40-49","20-59"; or missing as ""
 
-
+if inlist(name, "Jordan2002") {
+	replace w_mammogram_age = "20-49"
+}
 
 
 
