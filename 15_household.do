@@ -26,7 +26,8 @@
 	
 *hh_sampleweight Sample weight (v005/1000000)       
     gen hh_sampleweight = hv005/10e6 
- 
+    
+if ~inlist(name,"Jordan2002", "Malawi2000" ) {
 *hh_wealth_quintile	Wealth quintile       
     clonevar hh_wealth_quintile = hv270                          
 	
@@ -35,7 +36,12 @@
 	egen hhwealthscore_oldmin=min(hhwealthscore_old) 
 	gen hh_wealthscore=hhwealthscore_old-hhwealthscore_oldmin
 	replace hh_wealthscore=hh_wealthscore/10e6 
-	
+}
+
+if inlist(name,"Jordan2002", "Malawi2000" ) {
+	gen hh_wealthscore= .
+	g hh_wealth_quintile = .
+}	
 
 *hv001 Sampling cluster number (original)
 *hv002 Household number (original)
