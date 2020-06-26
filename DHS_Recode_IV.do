@@ -66,12 +66,11 @@ if _rc == 0 {
  		replace c_underweight=0 if hc71>=-2 & hc71!=.
 		
 		rename ant_sampleweight c_ant_sampleweight
-		keep c_* caseid bidx hwlevel
+		keep c_* caseid bidx hwlevel hc70 hc71
 		save "${INTER}/zsc_birth.dta",replace
     }
 
  	if hwlevel == 1 {
- 		use "${SOURCE}/DHS-`name'/DHS-`name'zsc.dta", clear
  		gen hhid = hwhhid
  		gen hvidx = hwline
  		merge 1:1 hhid hvidx using "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", keepusing(hv103 hv001 hv002 hv005)
@@ -97,6 +96,7 @@ if _rc == 0 {
     }
 
  }
+
 
 ******************************
 *****domains using birth data*
@@ -164,7 +164,6 @@ keep v001 v002 v003 w_* hm_*
 rename (v001 v002 v003) (hv001 hv002 hvidx)
 save `ind' 
 
-
 ************************************
 *****domains using hm level data****
 ************************************
@@ -174,18 +173,26 @@ gen name = "`name'"
     do "${DO}/14_demographics"
 	
 capture confirm file "${INTER}/zsc_hm.dta"
-    if _rc != 0 {
-    do "${DO}/9_child_anthropometrics" 
-	rename ant_sampleweight c_ant_sampleweight
-    }	
 	
 	if _rc == 0 {
-	merge 1:1 hhid hvidx using "${INTER}/zsc_hm.dta"
+	merge 1:1 hhid hvidx using "${INTER}/zsc_hm.dta",nogen
+	rename (hc70 hc71) (hm_hc70 hm_hc71)
 	}
 	
-keep hv001 hv002 hvidx hc70 hc71 ///
-c_* a_* hm_* ln 
+    if _rc != 0 {
+	  capture confirm file "${INTER}/zsc_birth.dta"
+	    if _rc != 0 {
+          do "${DO}/9_child_anthropometrics"  //if there's no zsc related file, then run 9_child_anthropometrics
+	      rename ant_sampleweight c_ant_sampleweight
+		}
+    }	
+	
+gen c_placeholder = 1
+keep hv001 hv002 hvidx  ///
+a_* hm_* ln c_*  *hc70 *hc71
+
 save `hm'
+
 
 capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
  	if _rc==0 {
