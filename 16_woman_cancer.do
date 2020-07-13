@@ -45,7 +45,7 @@ if _rc==0 {
 
 capture confirm variable s254
 if _rc == 0 {
-	g w_papsmear = s254 ==1 if s254<=1
+    replace w_papsmear = s254 ==1 if s254<=1
     ren v012 wage	
     replace w_papsmear=. if wage<20|wage>49
 }
