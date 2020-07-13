@@ -43,6 +43,13 @@ if _rc==0 {
     replace w_mammogram=. if wage<50|wage>69
 }
 
+capture confirm variable s254
+if _rc == 0 {
+	g w_papsmear = s254 ==1 if s254<=1
+    ren v012 wage	
+    replace w_papsmear=. if wage<20|wage>49
+}
+
 capture confirm variable s490a
 if _rc==0 {
 	replace  w_mammogram = s490a
@@ -59,6 +66,10 @@ if _rc==0 {
 gen w_mammogram_ref = ""  //use string in the list: "1yr","2yr","5yr","ever"; or missing as ""
 gen w_papsmear_ref = ""   //use string in the list: "1yr","2yr","3yr","5yr","ever"; or missing as ""
 
+if inlist(name, "Bolivia2003") {
+	replace w_papsmear_ref = "3yr"
+}
+
 if inlist(name, "Jordan2002") {
 	replace w_mammogram_ref = "1yr"
 }
@@ -68,6 +79,10 @@ if inlist(name, "Jordan2002") {
 
 gen w_mammogram_age = "" //use string in the list: "20-49","20-59"; or missing as ""
 gen w_papsmear_age = ""  //use string in the list: "40-49","20-59"; or missing as ""
+
+if inlist(name, "Bolivia2003") {
+	replace w_papsmear_age = "20-49"
+}
 
 if inlist(name, "Jordan2002") {
 	replace w_mammogram_age = "20-49"
