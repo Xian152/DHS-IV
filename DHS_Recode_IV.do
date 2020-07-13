@@ -220,7 +220,8 @@ use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
     merge 1:m v001 v002 v003 using "${SOURCE}/DHS-`name'/DHS-`name'birth.dta"
     rename (v001 v002 v003) (hv001 hv002 hvidx) 
     drop _merge
-
+    
+    gen name = "`name'"	
     do "${DO}/15_household"
 
 keep hv001 hv002 hv003 hh_* 
