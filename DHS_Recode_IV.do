@@ -235,6 +235,7 @@ save `hh'
 ***match with external iso data
 use "${SOURCE}/external/iso", clear 
 keep country iso2c iso3c
+replace country = "Burkina Faso" if country == "BurkinaFaso"
 save `iso'
 
 ***merge all subset of microdata
