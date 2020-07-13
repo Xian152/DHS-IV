@@ -14,7 +14,7 @@ the existance of the hiv data */
 
     *a_hiv	15-49 household member (female or male) tested positive for HIV1 or HIV2 (1/0)
     gen a_hiv=.
-    replace a_hiv=1 if a_hiv_cat==1|a_hiv_cat==2|a_hiv_cat==3
+    replace a_hiv=1 if a_hiv_cat==1|a_hiv_cat==2|a_hiv_cat==3|a_hiv_cat==4
     replace a_hiv=0 if a_hiv_cat==0
 	
 	
