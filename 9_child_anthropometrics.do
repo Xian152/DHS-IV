@@ -1,7 +1,7 @@
 
 ******************************
 *** Child anthropometrics ****
-******************************   
+******************************
 
 *c_stunted: Child under 5 stunted
 
@@ -11,7 +11,7 @@
 /*  ren hv001 v001 
  ren hv002 v002 
  ren hvidx b16 */
- 
+
 capture confirm variable hc70 hc71 
 if _rc == 0 {
 	 foreach var in hc70 hc71 {
@@ -30,8 +30,8 @@ if _rc == 0 {
 
 capture confirm variable hc70 hc71 
 if _rc !=0{
-	g hc70 =. 
-	g hc71 =.
+	g hm_hc70 =. 
+	g hm_hc71 =.
 	g  c_stunted=. 
 	g  c_underweight=.
 }
