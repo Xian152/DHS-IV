@@ -39,7 +39,7 @@ do "${DO}/0_GLOBAL.do"
 
 foreach name in $DHScountries_Recode_IV{	
 
-tempfile birth ind men hm hiv hh zsc iso 
+tempfile birth ind men hm hiv hh zsc iso wi
 
 ************************************
 ***domains using zsc data***********
@@ -97,7 +97,6 @@ if _rc == 0 {
 
  }
 
-
 ******************************
 *****domains using birth data*
 ******************************
@@ -116,7 +115,8 @@ use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta", clear
 	
 	capture confirm file "${INTER}/zsc_birth.dta"
 	if _rc == 0 {
-	merge 1:1 caseid bidx using "${INTER}/zsc_birth.dta"
+	merge 1:1 caseid bidx using "${INTER}/zsc_birth.dta",nogen
+	rename (hc70 hc71) (c_hc70 c_hc71)
     }
 	
 *housekeeping for birthdata
@@ -139,7 +139,13 @@ use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta", clear
 	
     *hm_doi	date of interview (cmc)
     gen hm_doi = v008
-
+	
+	if inlist(name,"Tanzania1999"){
+		ren s219 b16
+	}
+	if inlist(name,"DominicanRepublic1999"){
+		g b16=.
+	}
 rename (v001 v002 b16) (hv001 hv002 hvidx)
 keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_* 
 save `birth'
@@ -164,6 +170,7 @@ keep v001 v002 v003 w_* hm_*
 rename (v001 v002 v003) (hv001 hv002 hvidx)
 save `ind' 
 
+
 ************************************
 *****domains using hm level data****
 ************************************
@@ -180,6 +187,7 @@ capture confirm file "${INTER}/zsc_hm.dta"
 	}
 	
     if _rc != 0 {
+		
 	  capture confirm file "${INTER}/zsc_birth.dta"
 	    if _rc != 0 {
           do "${DO}/9_child_anthropometrics"  //if there's no zsc related file, then run 9_child_anthropometrics
@@ -188,21 +196,29 @@ capture confirm file "${INTER}/zsc_hm.dta"
     }	
 	
 gen c_placeholder = 1
-keep hv001 hv002 hvidx  ///
-a_* hm_* ln c_*  *hc70 *hc71
+keep hv001 hv002 hvidx a_* hm_* ln c_* 
 
 save `hm'
 
-
+gen name = "`name'"
+if !inlist(name,"DominicanRepublic2002","Mali2001","Zambia2001"){
 capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
  	if _rc==0 {
     use "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta", clear
+	gen name = "`name'"
     do "${DO}/12_hiv"
  	}
+capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
  	if _rc!= 0 {
     gen a_hiv = . 
     gen a_hiv_sampleweight = .
     }  
+}
+
+if inlist(name,"DominicanRepublic2002","Mali2001","Zambia2001"){
+    gen a_hiv = . 
+    gen a_hiv_sampleweight = .
+}	
 keep a_hiv* hv001 hv002 hvidx
 save `hiv'
 
@@ -210,22 +226,55 @@ use `hm',clear
 merge 1:1 hv001 hv002 hvidx using `hiv'
 drop _merge
 save `hm',replace
- 
+
 ************************************
 *****domains using hh level data****
 ************************************
+gen name = "`name'"
+if !inlist(name,"Mali2001","Senegal2005"){
 use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
     rename (hv001 hv002 hvidx) (v001 v002 v003)
 
     merge 1:m v001 v002 v003 using "${SOURCE}/DHS-`name'/DHS-`name'birth.dta"
     rename (v001 v002 v003) (hv001 hv002 hvidx) 
     drop _merge
-    
-    gen name = "`name'"	
+	gen name = "`name'"
+}
+* For Mali2001 & Senegal2005, the hv002 lost 2-3 digits, fix this issue in main.do, 1.do,4.do,12.do & 13.do
+if inlist(name,"Mali2001","Senegal2005"){
+	tempfile birthspec
+	use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta",clear
+	drop v002
+	gen v002 = substr(caseid,8,5)
+	save `birthspec',replace
+	
+	use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
+	drop hv002
+	gen hv002 = substr(hhid,8,5)
+	isid hv001 hv002 hvidx
+	order hhid hv000 hv001 hv002
+    rename (hv001 hv002 hvidx) (v001 v002 v003)
+
+    merge 1:m v001 v002 v003 using `birthspec'
+    rename (v001 v002 v003) (hv001 hv002 hvidx) 
+    drop _merge
+	gen name = "`name'"
+}
+	
+capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'wi.dta"
+ 	if _rc==0 {
+	preserve
+    use "${SOURCE}/DHS-`name'/DHS-`name'wi.dta", clear
+		ren (whhid wlthindf wlthind5) (hhid hv271 hv270)
+	save `wi',replace
+	restore
+	merge m:1 hhid using `wi',nogen
+	replace hv271=hv271*10e4
+ }
     do "${DO}/15_household"
 
-keep hv001 hv002 hv003 hh_* 
-save `hh' 
+keep hhid hv001 hv002 hv003 hh_* 
+save `hh',replace 
 
 
 ************************************
@@ -236,10 +285,26 @@ save `hh'
 use "${SOURCE}/external/iso", clear 
 keep country iso2c iso3c
 replace country = "BurkinaFaso" if country == "Burkina Faso"
+replace country = "DominicanRepublic" if country == "Dominican Republic"
+replace country = "Moldova" if country == "Moldova, Republic of"
+replace country = "Tanzania" if country == "Tanzania, United Republic of"
 save `iso'
 
 ***merge all subset of microdata
-use `hm',clear
+use `birth',clear 
+mdesc hvidx //identify the case where there is no child line info in hm.dta 
+gen miss_b16 = 1 if r(percent) == 1 
+
+if miss_b16 == 1 {
+   //when b16 is missing, the hm.dta can not be merged with birth.dta, the final microdata would be women and child only.
+  
+    merge m:1 hv001 hv002 hvidx using `ind',nogen update //merge child in birth.dta to mother in ind.dta
+    merge m:m hv001 hv002       using `hh',nogen update 
+}
+
+if miss_b16 != 1 {
+
+  use `hm',clear //when b16 is not missing, the hm.dta can be merged with birth.dta, the final microdata has all household member info
 
     merge 1:m hv001 hv002 hvidx using `birth',update              //missing update is zero, non missing conflict for all matched.(hvidx different) 
     replace hm_headrel = 99 if _merge == 2
@@ -250,8 +315,22 @@ use `hm',clear
     merge m:m hv001 hv002 hvidx using `ind',nogen update
 	merge m:m hv001 hv002       using `hh',nogen update
     
-	rename c_ant_sampleweight ant_sampleweight
     tab hh_urban,mi  //check whether all hh member + dead child + child lives outside hh assinged hh info
+}
+
+
+capture confirm variable c_hc70 c_hc71 
+if _rc == 0 {
+rename (c_hc70 c_hc71 ) (hc70 hc71 )
+}
+
+capture confirm variable hm_hc70 hm_hc71 
+if _rc == 0 {
+rename (hm_hc70 hm_hc71 ) (hc70 hc71 )
+}
+
+rename c_ant_sampleweight ant_sampleweight
+drop c_placeholder
 
 ***survey level data
     gen survey = "DHS-`name'"
@@ -273,10 +352,8 @@ preserve
 	cd "${INTER}"
 	do "${DO}/Quality_control_result"
 	save "${OUT}/quality_control",replace 
-    restore 
+restore 
 
-
-	
 *** Specify sample size to HEFPI
 	
     ***for variables generated from 1_antenatal_care 2_delivery_care 3_postnatal_care
@@ -302,8 +379,8 @@ preserve
     replace `var' = . if !inrange(hm_age_mon,0,59)
     }
 	
-	***for vriables generated from 9_child_anthropometrics
-	foreach var of var c_underweight c_stunted	hc70 hc71 ant_sampleweight{
+	***for vriables generated from 9_child_anthropometrics //
+	foreach var of var c_underweight c_stunted	 ant_sampleweight{
     replace `var' = . if !inrange(hm_age_mon,0,59)
     }
 	
@@ -331,7 +408,8 @@ preserve
     if _rc == 0 {
     erase "${INTER}/zsc_hm.dta"
     }	
-
 	
 save "${OUT}/DHS-`name'.dta", replace   
 }
+
+
