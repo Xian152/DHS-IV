@@ -6,13 +6,28 @@
 *c_measles	child			Child received measles1/MMR1 vaccination
         gen c_measles  =. 
 		replace c_measles = 1 if (h9 ==1 | h9 ==2 | h9 ==3)  
-     	replace c_measles = 0 if h9 ==0  	
-
+     	replace c_measles = 0 if h9 ==0 
+		
 if inlist(name,"Azerbaijan2006"){
-		replace c_measles = 1 if (h9 ==1 | h9 ==2 | h9 ==3 | inrange(s506mr,1,3))  
+		drop c_measles
+		gen c_measles = 1 if (h9 ==1 | h9 ==2 | h9 ==3 | inrange(s506mr,1,3))  
      	replace c_measles = 0 if h9 ==0 & s506mr == 0  
 		}
+		
+if inlist(name,"Colombia2000"){
+		drop c_measles
+		gen c_measles = 1 if (h9 ==1 | h9 ==2 | h9 ==3 | inrange(s456t,1,3))  
+     	replace c_measles = 0 if h9 ==0 & s456t == 0  
+		}	
+		
+if inlist(name,"Malawi2000"){
+		replace c_measles = 1 if h36a ==1 | h36b ==1 | h36c ==1  
+		}		
 	
+if inlist(name,"Zambia2001"){
+		replace c_measles = 1 if s465cd ==1  
+		}		
+
 *c_dpt1	child	Child received DPT1/Pentavalent 1 vaccination	
         gen c_dpt1  = . 
 		replace c_dpt1  = 1 if (h3 ==1 | h3 ==2 | h3 ==3)  
@@ -31,7 +46,7 @@ if inlist(name,"Azerbaijan2006"){
 *c_bcg	child			Child received BCG vaccination
 		gen c_bcg  = . 
 		replace c_bcg  = 1 if (h2 ==1 | h2 ==2 | h2 ==3)  
-		replace c_bcg  = 0 if h2 ==0  		
+		replace c_bcg  = 0 if h2 ==0
 
 		gen cpolio0  = .  
 		replace cpolio0  = 1 if (h0 ==1 | h0 ==2 | h0 ==3)  
@@ -51,7 +66,117 @@ if inlist(name,"Azerbaijan2006"){
 		gen c_polio3  = .  
 		replace c_polio3  = 1 if (h8 ==1 | h8 ==2 | h8 ==3)  
 		replace c_polio3  = 0 if h8 ==0  
+
+if inlist(name,"Armenia2000"){
+		drop c_bcg c_measles c_dpt* c_polio*
+		gen c_bcg = 1 if (h2 ==1 | h2 ==2 | h2 ==3 | inrange(sxh2,1,3))  
+     	replace c_bcg = 0 if h2 ==0 & sxh2 == 0  	
 		
+		gen c_measles = 1 if (h9 ==1 | h9 ==2 | h9 ==3 | inrange(sxh9,1,3)|spe==1)  
+     	replace c_measles = 0 if h9 ==0 & sxh9 == 0  & spe==0
+		
+		gen c_dpt1 = 1 if (h3==1 | h3==2 | h3==3|inrange(sxh3,1,3)) 
+		replace c_dpt1 = 0 if h3==0 & sxh3==0 
+
+		gen c_dpt2 = 1 if (h5==1 | h5==2 | h5==3|inrange(sxh5,1,3)) 
+		replace c_dpt2 = 0 if h5==0 & sxh5==0 
+		
+		gen c_dpt3 = 1 if (h7==1 | h7==2 | h7==3|inrange(sxh7,1,3)) 
+		replace c_dpt3 = 0 if h7==0 & sxh7==0
+
+		gen c_polio1 = 1 if (h4==1 | h4==2 | h4==3|inrange(sxh4,1,3)) 
+		replace c_polio1 = 0 if h4==0 & sxh4==0 
+
+		gen c_polio2 = 1 if (h6==1 | h6==2 | h6==3|inrange(sxh6,1,3)) 
+		replace c_polio2 = 0 if h6==0 & sxh6==0 
+		
+		gen c_polio3 = 1 if (h8==1 | h8==2 | h8==3|inrange(sxh8,1,3)) 
+		replace c_polio3 = 0 if h8==0 & sxh8==0
+}
+
+if inlist(name,"Armenia2005"){
+		replace c_bcg  = 1 if s512==1 & (c_bcg==. |c_bcg==0)
+		replace c_bcg  = 0 if s512==2 & c_bcg==. 	
+		
+		replace c_measles  = 1 if s512h==1 & (c_measles==. |c_measles==0)
+		replace c_measles  = 0 if s512h==2 & c_measles==. 	
+
+		replace c_dpt1  = 1 if s512g<=7 & (c_dpt1==. |c_dpt1==0)
+		replace c_dpt1  = 0 if s512f==2 & (c_dpt1==. |c_dpt1==0)
+		replace c_dpt2  = 1 if s512g<=7 & s512g>=2 & (c_dpt2==. |c_dpt2==0)
+		replace c_dpt2  = 0 if s512f==2 & (c_dpt2==. |c_dpt2==0)
+		replace c_dpt2  = 0 if s512g<2 & c_dpt2==. 
+		replace c_dpt3  = 1 if s512g<=7 & s512g>=3 & (c_dpt3==. |c_dpt3==0)
+		replace c_dpt3  = 0 if s512f==2 & (c_dpt3==. |c_dpt3==0)		
+		replace c_dpt3  = 0 if s512g<3 & c_dpt3==. 
+
+		replace c_polio1  = 1 if s512e<=7 & (c_polio1==. |c_polio1==0)
+		replace c_polio1  = 0 if s512d==2 & (c_polio1==. |c_polio1==0)
+		replace c_polio2  = 1 if s512e<=7 & s512e>=2 & (c_polio2==. |c_polio2==0)
+		replace c_polio2  = 0 if s512d==2 & (c_polio2==. |c_polio2==0)
+		replace c_polio2  = 0 if s512g<2 & c_polio2==. 
+		replace c_polio3  = 1 if s512e<=7 & s512e>=3 & (c_polio3==. |c_polio3==0)
+		replace c_polio3  = 0 if s512d==2 & (c_polio3==. |c_polio3==0)	
+		replace c_polio3  = 0 if s512g<3 & c_polio3==. 
+
+		}
+
+if inlist(name,"DominicanRepublic2002"){
+		drop c_dpt1 c_dpt2 c_dpt3
+		
+		gen c_dpt1 = .
+		replace c_dpt1 = 1 if (h3==1 | h3==2 | h3==3|inrange(dpt1,1,3)) 
+		replace c_dpt1 = 0 if h3==0 & dpt1==0 
+
+		gen c_dpt2 = .
+		replace c_dpt2 = 1 if (h5==1 | h5==2 | h5==3|inrange(dpt2,1,3)) 
+		replace c_dpt2 = 0 if h5==0  & dpt2==0 
+		
+		gen c_dpt3 = .
+		replace c_dpt3 = 1 if (h7==1 | h7==2 | h7==3|inrange(dpt3,1,3)) 
+		replace c_dpt3 = 0 if h7==0 & dpt3==0
+}	
+
+	
+if inlist(name,"Nicaragua2001"){
+		drop c_dpt1 c_dpt2 c_dpt3
+		
+		gen c_dpt1 = .
+		replace c_dpt1 = 1 if (h3==1 | h3==2 | h3==3|inrange(sd1,1,3)) 
+		replace c_dpt1 = 0 if h3==0 & sd1==0 
+
+		gen c_dpt2 = .
+		replace c_dpt2 = 1 if (h5==1 | h5==2 | h5==3|inrange(sd2,1,3)) 
+		replace c_dpt2 = 0 if h5==0 & sd2==0 
+		
+		gen c_dpt3 = .
+		replace c_dpt3 = 1 if (h7==1 | h7==2 | h7==3|inrange(sd3,1,3)) 
+		replace c_dpt3 = 0 if h7==0 & sd3==0 
+}	
+
+if inlist(name,"Philippines2003"){
+		drop c_polio3
+		
+		gen c_polio3  = .  
+		replace c_polio3  = 1 if (h8 ==1 | h8 ==2 | h8 ==3 |s463f==1)  
+		replace c_polio3  = 0 if h8 ==0  
+}
+
+if inlist(name,"Tanzania2004"){
+		drop c_dpt1 c_dpt2 c_dpt3
+		
+		gen c_dpt1 = .
+		replace c_dpt1 = 1 if (h3==1 | h3==2 | h3==3|inrange(hb1,1,3)) 
+		replace c_dpt1 = 0 if h3==0 & hb1==0 
+
+		gen c_dpt2 = .
+		replace c_dpt2 = 1 if (h5==1 | h5==2 | h5==3|inrange(hb2,1,3)) 
+		replace c_dpt2 = 0 if h5==0 & hb2==0 
+		
+		gen c_dpt3 = .
+		replace c_dpt3 = 1 if (h7==1 | h7==2 | h7==3|inrange(hb3,1,3)) 
+		replace c_dpt3 = 0 if h7==0 & hb3==0 
+}	
 *c_fullimm	child			Child fully vaccinated						
 		gen c_fullimm =.  										/*Note: polio0 is not part of allvacc- see DHS final report*/
 		replace c_fullimm =1 if (c_measles==1 & c_dpt1 ==1 & c_dpt2 ==1 & c_dpt3 ==1 & c_bcg ==1 & c_polio1 ==1 & c_polio2 ==1 & c_polio3 ==1)  
