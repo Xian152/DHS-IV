@@ -244,3 +244,28 @@ order *,sequential
 		gen v002 = substr(caseid,8,5)
 		order caseid v000 v001 v002 v003
 	}	
+/*
+	* Vietnam2002 miss b16, generate from ind.dta
+	if inlist(name,"Vietnam2002"){
+		tempfile t1
+		preserve 
+		use "${SOURCE}/DHS-Vietnam2002/DHS-Vietnam2002ind.dta", clear	
+		keep caseid v000 v001 v002 v003 v004 v005 v008 v006 v007 v016 v018 v106 bidx_* b0* b1* b2* b3* s345_*
+		drop *_12 *_13 *_14 *_15 *_16 *_17 *_18 *_19 *_20 // no birth info. 
+		ren (bidx_01 bidx_02 bidx_03 bidx_04 bidx_05 bidx_06 bidx_07 bidx_08 bidx_09) (bidx_1 bidx_2 bidx_3 bidx_4 bidx_5 bidx_6 bidx_7 bidx_8 bidx_9)
+		foreach k in 0 1 2 3 {
+			ren (b`k'_01 b`k'_02 b`k'_03 b`k'_04 b`k'_05 b`k'_06 b`k'_07 b`k'_08 b`k'_09) (b`k'_1 b`k'_2 b`k'_3 b`k'_4 b`k'_5 b`k'_6 b`k'_7 b`k'_8 b`k'_9)
+		}
+		reshape long b0_ b1_ b2_ b3_ s345_ bidx_ , i(caseid) j(bidx) 
+		drop if bidx_==.
+		drop bidx_
+		ren (b0_ b1_ b2_ b3_ s345_) (b0 b1 b2 b3 b16)
+		isid caseid b0 b1 b2 b3 
+		sort caseid b0 b1 b2 b3 
+		save `t1',replace
+		restore 
+		merge 1:1 caseid b0 b1 b2 b3 using `t1'
+		tab _m // fully merge, have check children's charactistic from b4-b15, is a perfect match 
+		drop _m 
+	}	
+*/
