@@ -93,45 +93,55 @@ order *,sequential  //make sure variables are in order.
 		}
         gen c_diarrhea_mof = (h38 == 5) if !inlist(h38,.,8,9) & c_diarrhea == 1
 
-cap gen h15i=. 
-cap gen h15j=. 
-cap gen h15k=. 
-cap gen h15l=. 
-recode h12z h15 h15a h15b h15c h15d h15e h15f h15g h15h h15i h15j h15k h15l(8 9 =.)	
 *c_diarrhea_medfor Get formal medicine except (ors hmf home other_med, country specific. 
         egen medfor = rowtotal(h12z h15 h15a h15b h15c h15e h15g h15h ),mi
+		gen c_diarrhea_medfor = ( medfor > = 1 ) if c_diarrhea == 1 & medfor!=.
+		replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)|inlist(h15e,8,9)|inlist(h15g,8,9)|inlist(h15h,8,9)
+
 		if inlist(name,"Armenia2005", "Colombia2000","Peru2000","Zimbabwe1999"){
-			drop medfor
+			drop medfor c_diarrhea_medfor
 			egen medfor = rowtotal(h12z h15 h15a h15b h15c h15f h15g h15h ),mi  // pedialite, frutiflex, other liquids
+			gen c_diarrhea_medfor = ( medfor > = 1 ) if c_diarrhea == 1 & medfor!=.
+			replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)|inlist(h15f,8,9)|inlist(h15g,8,9)|inlist(h15h,8,9)			
 		}
 		if inlist(name,"Egypt2005","Ethiopia2005" ){
-			drop medfor
+			drop medfor c_diarrhea_medfor
 			egen medfor = rowtotal(h12z h15 h15a h15b h15c h15e h15f h15g h15h),mi 
+			gen c_diarrhea_medfor = ( medfor > = 1 ) if c_diarrhea == 1 & medfor!=.
+			replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)|inlist(h15e,8,9)|inlist(h15f,8,9)|inlist(h15g,8,9)|inlist(h15h,8,9)
 		}		
 		if inlist(name,"Moldova2005"){
-			drop medfor
+			drop medfor c_diarrhea_medfor
 			egen medfor = rowtotal(h12z h15 h15a h15b h15c h15e h15f h15h),mi 
+			gen c_diarrhea_medfor = ( medfor > = 1 ) if c_diarrhea == 1 & medfor!=.
+			replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)|inlist(h15e,8,9)|inlist(h15f,8,9)|inlist(h15h,8,9)
 		}			
 		if inlist(name,"Mozambique2003"){
-			drop medfor
+			drop medfor c_diarrhea_medfor
 			egen medfor = rowtotal(h12z h15 h15a h15b h15c),mi 
+			gen c_diarrhea_medfor = ( medfor > = 1 ) if c_diarrhea == 1 & medfor!=.
+			replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)
 		}			
-		gen c_diarrhea_medfor = ( medfor > = 1 ) if c_diarrhea == 1 & medfor!=.
+
 		// formal medicine don't include "home remedy, herbal medicine and other"
-        //replace c_diarrhea_medfor = . if (h12z == 8 | h15 == 8 | h15a == 8 | h15b == 8 | h15c == 8 | h15e == 8  | h15g == 8 | h15h == 8  )                                       
 
 *c_diarrhea_med	Child with diarrhea received any medicine other than ORS or hmf (country specific)
         egen med = rowtotal(h12z h15 h15a h15b h15c h15d h15e h15f h15g h15h),mi
+		gen c_diarrhea_med = ( med > = 1 ) if c_diarrhea == 1 & med!=.
+        replace c_diarrhea_med = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)|inlist(h15d,8,9)|inlist(h15e,8,9)|inlist(h15f,8,9)|inlist(h15g,8,9)|inlist(h15h,8,9)
+
        	if inlist(name,"Colombia2000","Peru2000","Zimbabwe1999"){
-			drop med
+			drop med c_diarrhea_med
 			egen med = rowtotal(h12z h15 h15a h15b h15c h15d h15f h15g h15h),mi  // pedialite, frutiflex, other liquids
+			gen c_diarrhea_med = ( med > = 1 ) if c_diarrhea == 1 & med!=.
+			replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)|inlist(h15f,8,9)|inlist(h15g,8,9)|inlist(h15h,8,9)
 		}
 		if inlist(name,"Mozambique2003"){
-			drop med
+			drop med c_diarrhea_med
 			egen med = rowtotal(h12z h15 h15a h15b h15c),mi 
+			gen c_diarrhea_med = ( med > = 1 ) if c_diarrhea == 1 & med!=.
+			replace c_diarrhea_medfor = . if inlist(h12z,8,9) |inlist(h15,8,9)|inlist(h15a,8,9)|inlist(h15b,8,9)|inlist(h15c,8,9)
 		}	
-		gen c_diarrhea_med = ( med > = 1 ) if c_diarrhea == 1 & med!=.
-        //replace c_diarrhea_med = . if (h12z == 8 | h15 == 8 | h15a == 8 | h15b == 8 | h15c == 8 | h15d == 8 | h15e == 8 | h15f == 8 | h15g == 8 | h15h == 8 )
 		
 *c_diarrheaact	Child with diarrhea seen by provider OR given any form of formal treatment
         gen c_diarrheaact = (c_diarrhea_pro==1 | c_diarrhea_medfor==1 | c_diarrhea_hmf==1 | c_treatdiarrhea==1) if c_diarrhea == 1
