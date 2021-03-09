@@ -118,26 +118,24 @@ if inlist(name,"Armenia2005"){
 		replace c_polio3  = 1 if s512e<=7 & s512e>=3 & (c_polio3==. |c_polio3==0)
 		replace c_polio3  = 0 if s512d==2 & (c_polio3==. |c_polio3==0)	
 		replace c_polio3  = 0 if s512g<3 & c_polio3==. 
-
 		}
-
-if inlist(name,"DominicanRepublic2002"){
-		drop c_dpt1 c_dpt2 c_dpt3
 		
-		gen c_dpt1 = .
-		replace c_dpt1 = 1 if (h3==1 | h3==2 | h3==3|inrange(dpt1,1,3)) 
-		replace c_dpt1 = 0 if h3==0 & dpt1==0 
-
-		gen c_dpt2 = .
-		replace c_dpt2 = 1 if (h5==1 | h5==2 | h5==3|inrange(dpt2,1,3)) 
-		replace c_dpt2 = 0 if h5==0  & dpt2==0 
+if inlist(name,"Colombia2005"){
+		drop c_measles c_dpt* 
 		
-		gen c_dpt3 = .
-		replace c_dpt3 = 1 if (h7==1 | h7==2 | h7==3|inrange(dpt3,1,3)) 
-		replace c_dpt3 = 0 if h7==0 & dpt3==0
-}	
+		gen c_measles = 1 if (h9 ==1 | h9 ==2 | h9 ==3 | inrange(s506t,1,3)
+     	replace c_measles = 0 if h9 ==0 & s506t == 0 
+		
+		gen c_dpt1 = 1 if (h3==1 | h3==2 | h3==3|inrange(spv1,1,3)) 
+		replace c_dpt1 = 0 if h3==0 & spv1==0 
 
-	
+		gen c_dpt2 = 1 if (h5==1 | h5==2 | h5==3|inrange(spv2,1,3)) 
+		replace c_dpt2 = 0 if h5==0 & spv2==0 
+		
+		gen c_dpt3 = 1 if (h7==1 | h7==2 | h7==3|inrange(spv3,1,3)) 
+		replace c_dpt3 = 0 if h7==0 & spv3==0
+}
+
 if inlist(name,"Nicaragua2001"){
 		drop c_dpt1 c_dpt2 c_dpt3
 		
