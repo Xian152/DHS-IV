@@ -108,7 +108,7 @@ use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta", clear
     do "${DO}/1_antenatal_care"
     do "${DO}/2_delivery_care"
     do "${DO}/3_postnatal_care"
-    do "${DO}/7_child_vaccination"
+    do "${DO}/7_child_vaccinationtest"
     do "${DO}/8_child_illness"
     do "${DO}/10_child_mortality"
     do "${DO}/11_child_other"
@@ -140,15 +140,27 @@ use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta", clear
     *hm_doi	date of interview (cmc)
     gen hm_doi = v008
 	
-	if inlist(name,"Tanzania1999"){
+	if inlist(name,"DominicanRepublic1999","Tanzania1999"){
 		ren s219 b16
 	}
-	if inlist(name,"DominicanRepublic1999"){
-		g b16=.
+	if inlist(name,"Vietnam2002"){
+		gen  b16 =.
 	}
+	*identify the case where there is no child line info in hm.dta 
+    mdesc b16 
+    gen miss_b16 = 1 if r(percent) == 100 
+
+if miss_b16 != 1 {
 rename (v001 v002 b16) (hv001 hv002 hvidx)
+}
+
+if miss_b16 == 1 {
+rename (v001 v002 v003) (hv001 hv002 hvidx) //v003 in birth.dta: mother's line number
+}
+
 keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_* 
 save `birth'
+
 
 
 ******************************
@@ -293,7 +305,7 @@ save `iso'
 ***merge all subset of microdata
 use `birth',clear 
 mdesc hvidx //identify the case where there is no child line info in hm.dta 
-gen miss_b16 = 1 if r(percent) == 1 
+gen miss_b16 = 1 if r(percent) == 1
 
 if miss_b16 == 1 {
    //when b16 is missing, the hm.dta can not be merged with birth.dta, the final microdata would be women and child only.
@@ -317,6 +329,7 @@ if miss_b16 != 1 {
     
     tab hh_urban,mi  //check whether all hh member + dead child + child lives outside hh assinged hh info
 }
+
 
 
 capture confirm variable c_hc70 c_hc71 
@@ -345,7 +358,12 @@ drop c_placeholder
 *** Quality Control: Validate with DHS official data
 gen surveyid = iso2c+year+"DHS"
 gen name = "`name'"
-    
+ 
+* to match with HEFPI_DHS.dta surveyid (differ in year)
+	if inlist(name,"Colombia2005") {
+		replace surveyid = "CO2004DHS"
+	}
+	
 preserve
 	do "${DO}/Quality_control"
 	save "${INTER}/quality_control-`name'",replace
@@ -353,7 +371,6 @@ preserve
 	do "${DO}/Quality_control_result"
 	save "${OUT}/quality_control",replace 
 restore 
-
 *** Specify sample size to HEFPI
 	
     ***for variables generated from 1_antenatal_care 2_delivery_care 3_postnatal_care
@@ -411,5 +428,3 @@ restore
 	
 save "${OUT}/DHS-`name'.dta", replace   
 }
-
-
